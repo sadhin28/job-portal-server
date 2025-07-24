@@ -30,7 +30,9 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-   
+    //create database
+    const JobPostsCollection=client.db('Job-Posted-Data').collection('Jobs')
+    const JobApplicationCollection=client.db('Job-Application-Data').collection('Applycation-Jobs')
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
