@@ -31,8 +31,18 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     //create database
-    const JobPostsCollection=client.db('Job-Posted-Data').collection('Jobs')
-    const JobApplicationCollection=client.db('Job-Application-Data').collection('Applycation-Jobs')
+    const JobPostsCollection=client.db('Job-Posted-Data').collection('PostedJobs')
+    const JobApplicationCollection=client.db('Job-Application-Data').collection('Job-Application')
+    const initialdatacollection=client.db('jobportal').collection('jobs')
+    
+    //get initial data
+    app.get('/jobs',async(req,res)=>{
+        const cursor = initialdatacollection.find();
+        const result = await cursor.toArray();
+        res.send(result)
+    })
+    
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
