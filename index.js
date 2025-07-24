@@ -16,7 +16,7 @@ app.get('/ping',(req,res)=>{
 
 //connect with mongodb
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASS}@cluster0.sutdyn1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -42,7 +42,13 @@ async function run() {
         res.send(result)
     })
     
-
+   //get initial jobs data by id
+   app.get('/jobs/:id',async(req,res)=>{
+     const id =req.params.id;
+     const query={_id: new ObjectId(id)}
+     const result =await initialdatacollection.findOne(query)
+     res.send(result)
+   })
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
