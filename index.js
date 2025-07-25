@@ -31,7 +31,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         //create database
-        const JobPostsCollection = client.db('Job-Posted-Data').collection('PostedJobs')
+        const addPostsCollection = client.db('Job-Posted-Data').collection('PostedJobs')
         const JobApplicationCollection = client.db('Job-Application-Data').collection('Job-Application')
         const initialdatacollection = client.db('jobportal').collection('jobs')
         
@@ -50,7 +50,43 @@ async function run() {
             const result = await initialdatacollection.findOne(query)
             res.send(result)
         })
+         //post a job
+         app.post('/postJob',async(req,res)=>{
+            const newJobPost = req.body;
+            res.send(newJobPost);
+            const result = await addPostsCollection.insertOne(newJobPost)
+            res.send(result);
+         })
 
+        app.get('/postJob',async(req,res)=>{
+            const cursor =addPostsCollection.find();
+            const result = await cursor.toArray();
+            res.send(result)
+        })
+         //delete posted job
+         app.delete('/postJob/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id:new ObjectId(id)}
+            const result = await addPostsCollection.deleteOne(query)
+            res.send(result)
+         })
+
+       //get one PostJob by id
+          app.get('/postJob/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await addPostsCollection.findOne(query)
+            res.send(result)
+        })
+
+       //get some data by email using query
+        app.get('/my-jobposts',async(req,res)=>{
+         const email = req.query.email;
+         const query = {hr_email : email}
+         const result = await addPostsCollection.find(query).toArray();
+         res.send(result)
+
+       })
         //Post application
         app.post('/apply',async(req,res)=>{
             const newApply = req.body;
@@ -74,6 +110,7 @@ async function run() {
             res.send(result)
         })
        
+
         //delete application
         app.delete('/apply/:id',async(req,res)=>{
             const id=req.params.id;
