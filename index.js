@@ -51,39 +51,25 @@ async function run() {
             res.send(result)
         })
          //post a job
-         app.post('/postJob',async(req,res)=>{
+         app.post('/jobs',async(req,res)=>{
             const newJobPost = req.body;
             res.send(newJobPost);
-            const result = await addPostsCollection.insertOne(newJobPost)
+            const result = await initialdatacollection.insertOne(newJobPost)
             res.send(result);
          })
-
-        app.get('/postJob',async(req,res)=>{
-            const cursor =addPostsCollection.find();
-            const result = await cursor.toArray();
-            res.send(result)
-        })
          //delete posted job
-         app.delete('/postJob/:id',async(req,res)=>{
+         app.delete('/jobs/:id',async(req,res)=>{
             const id = req.params.id;
             const query = {_id:new ObjectId(id)}
-            const result = await addPostsCollection.deleteOne(query)
+            const result = await initialdatacollection.deleteOne(query)
             res.send(result)
          })
-
-       //get one PostJob by id
-          app.get('/postJob/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: new ObjectId(id) }
-            const result = await addPostsCollection.findOne(query)
-            res.send(result)
-        })
 
        //get some data by email using query
         app.get('/my-jobposts',async(req,res)=>{
          const email = req.query.email;
          const query = {hr_email : email}
-         const result = await addPostsCollection.find(query).toArray();
+         const result = await initialdatacollection.find(query).toArray();
          res.send(result)
 
        })
