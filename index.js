@@ -64,7 +64,23 @@ async function run() {
             const cursor = JobApplicationCollection.find();
             const result = await cursor.toArray();
             res.send(result)
-        }) 
+        })
+
+        //get one applicatin by id
+          app.get('/apply/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await JobApplicationCollection.findOne(query)
+            res.send(result)
+        })
+       
+        //delete application
+        app.delete('/apply/:id',async(req,res)=>{
+            const id=req.params.id;
+            const query = {_id:new ObjectId(id)};
+            const result = await JobApplicationCollection.deleteOne(query)
+            res.send(result)
+        })
        //get some data by email
        app.get('/job-application',async(req,res)=>{
          const email = req.query.email;
