@@ -42,7 +42,7 @@ async function run() {
             const result = await cursor.toArray();
             res.send(result)
         })
-
+        
         //get initial jobs data by id
         app.get('/jobs/:id', async (req, res) => {
             const id = req.params.id;
@@ -79,16 +79,40 @@ async function run() {
             const newApply = req.body;
             res.send(newApply);
             const result = await JobApplicationCollection.insertOne(newApply);
+            
+           const id=newApply.job_id;
+           const query = {_id:new ObjectId(id)}
+           const job=await initialdatacollection.findOne(query);
+           let newcount =0
+           if(job.applicationCount){
+               newcount = job.applicationCount +1;
+           }else{
+             newcount=1;
+           }
+           //Now update newcount
+           const filter = {_id : new ObjectId(id)}
+           const updatedDoc ={
+            $set:{
+                applicationCount:newcount
+            }
+           }
+           const updateResult = await initialdatacollection.updateOne(filter,updatedDoc)
             res.send(result)
         })
-
+        
         //get all application data
         app.get('/apply',async(req,res)=>{
             const cursor = JobApplicationCollection.find();
             const result = await cursor.toArray();
             res.send(result)
         })
-
+         //get application by job_id
+        app.get('/job-application/:job_id',async(req,res)=>{
+            const Jobid = req.params.job_id;
+            const query ={job_id:Jobid}
+            const result = await JobApplicationCollection.find(query).toArray()
+            res.send(result)
+        })
         //get one applicatin by id
           app.get('/apply/:id', async (req, res) => {
             const id = req.params.id;
