@@ -128,7 +128,19 @@ async function run() {
             const updateResult = await initialdatacollection.updateOne(filter, updatedDoc)
             res.send(result)
         })
-
+        //patch status
+        app.patch('/apply/:id',async(req,res)=>{
+            const id = req.params.id;
+            const data = req.body;
+            const filter ={_id:new ObjectId(id)};
+            const updatedDoc ={
+                $set:{
+                    status:data.status
+                }
+            }
+            const result = await  JobApplicationCollection.updateOne(filter,updatedDoc)
+            res.send(result)
+        })
         //get all application data
         app.get('/apply', async (req, res) => {
             const cursor = JobApplicationCollection.find();
