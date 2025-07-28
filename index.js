@@ -30,14 +30,11 @@ app.get('/ping', (req, res) => {
     if(!tokens){
          return res.status(401).send({message:'Unauthorized Access'})
     }
-    jwt.verify(tokens,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
-        if(err){
-             return res.status(401).send({message:'Unauthorized Access'})
-        }
+    
 
      next()
         
-    })
+    
    
   
    }
