@@ -1,19 +1,14 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const cookieParser = require('cookie-parser')
+
 const cors = require('cors');
 const port = process.env.PORT || 5000;
 const app = express()
 require('dotenv').config()
 //middlewire
-app.use(cors({
-    origin:['https://job-portal-72009.web.app'],
-    credentials:true
-}));
-app.use(cookieParser());
+app.use(cors());
+
 app.use(express.json({ limit: '50mb' }));
 
-const accessTokenkey=process.env.ACCESS_TOKEN_SECRET
 
 
 
@@ -24,20 +19,6 @@ app.get('/ping', (req, res) => {
     res.send('Pong')
 })
 
- const verifyToken = (req,res,next)=>{
- const tokens=req?.cookies?.token
-
-    if(!tokens){
-         return res.status(401).send({message:'Unauthorized Access'})
-    }
-    
-
-     next()
-        
-    
-   
-  
-   }
 
 //connect with mongodb
 
@@ -63,19 +44,6 @@ async function run() {
         const addPostsCollection = client.db('Job-Posted-Data').collection('PostedJobs')
         const JobApplicationCollection = client.db('Job-Application-Data').collection('Job-Application')
         const initialdatacollection = client.db('jobportal').collection('jobs')
-
-        //auth related APIs
-        app.post('/jwt', async (req, res) => {
-            const user = req.body;
-            const token = jwt.sign(user, 'secret', { expiresIn: '1h' })
-           
-           res.cookie('token', token, {
-                    httpOnly: true,
-                    secure: true,
-
-                })
-           .send({ success: true })
-        })
 
         //get initial data
         app.get('/jobs', async (req, res) => {
@@ -215,7 +183,6 @@ async function run() {
         app.get('/job-application',async (req, res) => {
             const email = req.query.email;
             const query = { applicant_email: email }
-            console.log(req.cookies)
             const result = await JobApplicationCollection.find(query).toArray();
             res.send(result)
 
