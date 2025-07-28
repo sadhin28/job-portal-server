@@ -6,9 +6,16 @@ const port = process.env.PORT || 5000;
 const app = express()
 require('dotenv').config()
 //middlewire
-app.use(cors());
+app.use(cors({
+    origin:['https://job-portal-72009.web.app'],
+    credentials:true
+}));
 app.use(cookieParser());
 app.use(express.json({ limit: '50mb' }));
+
+const accessTokenkey=process.env.ACCESS_TOKEN_SECRET
+
+
 
 app.get('/', (req, res) => {
     res.send('Job Portal Is Running')
@@ -16,6 +23,24 @@ app.get('/', (req, res) => {
 app.get('/ping', (req, res) => {
     res.send('Pong')
 })
+
+ const verifyToken = (req,res,next)=>{
+ const tokens=req?.cookies?.token
+
+    if(!tokens){
+         return res.status(401).send({message:'Unauthorized Access'})
+    }
+    jwt.verify(tokens,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
+        if(err){
+             return res.status(401).send({message:'Unauthorized Access'})
+        }
+
+     next()
+        
+    })
+   
+  
+   }
 
 //connect with mongodb
 
@@ -33,6 +58,10 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
+   
+  
+     
+   
         //create database
         const addPostsCollection = client.db('Job-Posted-Data').collection('PostedJobs')
         const JobApplicationCollection = client.db('Job-Application-Data').collection('Job-Application')
@@ -42,13 +71,13 @@ async function run() {
         app.post('/jwt', async (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, 'secret', { expiresIn: '1h' })
-            res
-                .cookie('token', token, {
-                    httponly: true,
+           
+           res.cookie('token', token, {
+                    httpOnly: true,
                     secure: false,
 
                 })
-                .send({ success: true })
+           .send({ success: true })
         })
 
         //get initial data
@@ -186,9 +215,10 @@ async function run() {
             res.send(result)
         })
         //get some data by email
-        app.get('/job-application', async (req, res) => {
+        app.get('/job-application',verifyToken,async (req, res) => {
             const email = req.query.email;
             const query = { applicant_email: email }
+            console.log(req.cookies)
             const result = await JobApplicationCollection.find(query).toArray();
             res.send(result)
 
