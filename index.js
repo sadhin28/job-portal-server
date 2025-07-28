@@ -1,10 +1,13 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser')
 const cors = require('cors');
 const port = process.env.PORT || 5000;
 const app = express()
 require('dotenv').config()
 //middlewire
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json({ limit: '50mb' }));
 
 app.get('/', (req, res) => {
@@ -34,12 +37,18 @@ async function run() {
         const addPostsCollection = client.db('Job-Posted-Data').collection('PostedJobs')
         const JobApplicationCollection = client.db('Job-Application-Data').collection('Job-Application')
         const initialdatacollection = client.db('jobportal').collection('jobs')
-        
+
         //auth related APIs
-        app.post('/jwt',async(req,res)=>{
+        app.post('/jwt', async (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user,'secret',{expiresIn: '1h'})
-            res.send(token)
+            const token = jwt.sign(user, 'secret', { expiresIn: '1h' })
+            res
+                .cookie('token', token, {
+                    httponly: true,
+                    secure: false,
+
+                })
+                .send({ success: true })
         })
 
         //get initial data
@@ -135,16 +144,16 @@ async function run() {
             res.send(result)
         })
         //patch status
-        app.patch('/apply/:id',async(req,res)=>{
+        app.patch('/apply/:id', async (req, res) => {
             const id = req.params.id;
             const data = req.body;
-            const filter ={_id:new ObjectId(id)};
-            const updatedDoc ={
-                $set:{
-                    status:data.status
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: data.status
                 }
             }
-            const result = await  JobApplicationCollection.updateOne(filter,updatedDoc)
+            const result = await JobApplicationCollection.updateOne(filter, updatedDoc)
             res.send(result)
         })
         //get all application data
