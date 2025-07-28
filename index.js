@@ -34,7 +34,13 @@ async function run() {
         const addPostsCollection = client.db('Job-Posted-Data').collection('PostedJobs')
         const JobApplicationCollection = client.db('Job-Application-Data').collection('Job-Application')
         const initialdatacollection = client.db('jobportal').collection('jobs')
-
+        
+        //auth related APIs
+        app.post('/jwt',async(req,res)=>{
+            const user = req.body;
+            const token = jwt.sign(user,'secret',{expiresIn: '1h'})
+            res.send(token)
+        })
 
         //get initial data
         app.get('/jobs', async (req, res) => {
