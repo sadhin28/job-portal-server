@@ -8,7 +8,7 @@ require('dotenv').config()
 //middlewire
 app.use(cookieParser());
 app.use(cors({
-    origin: 'https://job-portal-72009.web.app', // Frontend URL
+    origin: ['https://job-portal-72009.web.app','http://localhost:5173'], // Frontend URL
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true // Allow cookies if needed
 }));
