@@ -1,11 +1,17 @@
 const express = require('express');
-
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const port = process.env.PORT || 5000;
 const app = express()
 require('dotenv').config()
 //middlewire
-app.use(cors());
+app.use(cookieParser());
+app.use(cors({
+    origin: 'https://job-portal-72009.web.app', // Frontend URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true // Allow cookies if needed
+}));
 
 app.use(express.json({ limit: '50mb' }));
 
@@ -44,6 +50,19 @@ async function run() {
         const addPostsCollection = client.db('Job-Posted-Data').collection('PostedJobs')
         const JobApplicationCollection = client.db('Job-Application-Data').collection('Job-Application')
         const initialdatacollection = client.db('jobportal').collection('jobs')
+
+
+        //auth related apis
+        app.post('/jwt',async(req,res)=>{
+            const user = req.body;
+            const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'})
+            res.cookie('token',token,{
+                httpOnly:true,
+                secure:false,
+                sameSite:'static'
+            })
+            .send({success:true})
+        })
 
         //get initial data
         app.get('/jobs', async (req, res) => {
