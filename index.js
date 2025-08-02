@@ -7,30 +7,26 @@ const app = express()
 require('dotenv').config()
 //middlewire
 app.use(cookieParser());
-app.use(cors({
-    origin: ['https://job-portal-72009.web.app/'], // Frontend URL
-    methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
-    credentials: true // Allow cookies if needed
-}));
+app.use(cors());
 
 app.use(express.json({ limit: '50mb' }));
 
 
-const verifyToken=(req,res,next)=>{
-    const token = req?.cookies?.token;
-    console.log(token)
-    if(!token){
-        return res.status(401).send({message:"unAuthorized Access"})
-    }
-    jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
-        if(err){
-           return res.status(401).send({message:"unAuthorized Access"})
-        }
-        req.user = decoded
+// const verifyToken=(req,res,next)=>{
+//     const token = req?.cookies?.token;
+//     console.log(token)
+//     if(!token){
+//         return res.status(401).send({message:"unAuthorized Access"})
+//     }
+//     jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
+//         if(err){
+//            return res.status(401).send({message:"unAuthorized Access"})
+//         }
+//         req.user = decoded
         
-        next()
-    })
-}
+//         next()
+//     })
+// }
 
 
 app.get('/', (req, res) => {
@@ -67,17 +63,17 @@ async function run() {
         const initialdatacollection = client.db('jobportal').collection('jobs')
 
 
-        //auth related apis
-        app.post('/jwt',async(req,res)=>{
-            const user = req.body;
-            const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'})
-            res.cookie('token',token,{
-                httpOnly:true,
-                secure:false,
+        // //auth related apis
+        // app.post('/jwt',async(req,res)=>{
+        //     const user = req.body;
+        //     const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'})
+        //     res.cookie('token',token,{
+        //         httpOnly:true,
+        //         secure:false,
                
-            })
-            .send({success:true})
-        })
+        //     })
+        //     .send({success:true})
+        // })
 
         //get initial data
         app.get('/jobs', async (req, res) => {
@@ -214,13 +210,9 @@ async function run() {
             res.send(result)
         })
         //get some data by email
-        app.get('/job-application',verifyToken,async (req, res) => {
+        app.get('/job-application',async (req, res) => {
             const email = req.query.email;
             const query = { applicant_email: email }
-            console.log(req.cookies)
-            if(req.user.email !== req.query.email){
-                return res.status(403).send({message:"forbidden Access"})
-            }
             const result = await JobApplicationCollection.find(query).toArray();
             res.send(result)
 
