@@ -9,13 +9,28 @@ require('dotenv').config()
 app.use(cookieParser());
 app.use(cors({
     origin: ['https://job-portal-72009.web.app','http://localhost:5173'], // Frontend URL
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
     credentials: true // Allow cookies if needed
 }));
 
 app.use(express.json({ limit: '50mb' }));
 
 
+const verifyToken=(req,res,next)=>{
+    const token = req?.cookies?.token;
+    console.log(token)
+    if(!token){
+        return res.status(401).send({message:"unAuthorized Access"})
+    }
+    jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
+        if(err){
+           return res.status(401).send({message:"unAuthorized Access"})
+        }
+        req.user = decoded
+        
+        next()
+    })
+}
 
 
 app.get('/', (req, res) => {
@@ -59,7 +74,7 @@ async function run() {
             res.cookie('token',token,{
                 httpOnly:true,
                 secure:false,
-                sameSite:'static'
+               
             })
             .send({success:true})
         })
@@ -199,9 +214,13 @@ async function run() {
             res.send(result)
         })
         //get some data by email
-        app.get('/job-application',async (req, res) => {
+        app.get('/job-application',verifyToken,async (req, res) => {
             const email = req.query.email;
             const query = { applicant_email: email }
+          
+            if(req.user.email !== req.query.email){
+                return res.status(403).send({message:"forbidden Access"})
+            }
             const result = await JobApplicationCollection.find(query).toArray();
             res.send(result)
 
