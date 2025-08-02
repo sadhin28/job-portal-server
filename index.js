@@ -8,7 +8,7 @@ require('dotenv').config()
 //middlewire
 app.use(cookieParser());
 app.use(cors({
-    origin: ['https://job-portal-72009.web.app','http://localhost:5173'], // Frontend URL
+    origin: ['https://job-portal-72009.web.app/'], // Frontend URL
     methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
     credentials: true // Allow cookies if needed
 }));
@@ -217,7 +217,7 @@ async function run() {
         app.get('/job-application',verifyToken,async (req, res) => {
             const email = req.query.email;
             const query = { applicant_email: email }
-          
+            console.log(req.cookies)
             if(req.user.email !== req.query.email){
                 return res.status(403).send({message:"forbidden Access"})
             }
