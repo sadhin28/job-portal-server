@@ -7,7 +7,11 @@ const app = express()
 require('dotenv').config()
 //middlewire
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+    origin:  "https://job-portal-72009.web.app", 
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  }));
 
 app.use(express.json({ limit: '50mb' }));
 
